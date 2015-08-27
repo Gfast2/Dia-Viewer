@@ -29,6 +29,7 @@ AccelStepper motor(1, 2, 3); //(mode, st pin, dir pin) Tipp: https://www.pjrc.co
 int st = 2;     // step motor driver step pin
 int button = 8; // push button for user
 int sensor = 6; // infarot sensor (for positioning) pin, using the white wire, 1-position hole, 0-normal.
+int readPin[4] = {3,4,7,12};
 
 boolean sensorState;     // default not see the position hole. false - no hole, true - hole (sensor triggered)
 boolean buttonState;     // when button pushed down return LOW, else return HIGH
@@ -73,23 +74,23 @@ void loop(){
   motor.run();
 }
 
-// If machine is not used more than timeInterval minute and it is not showing the first dia.
-// this method rotate the wheel back to the front. (it will block the programm flow)
+// If machine is not used more than timeInterval milliseconds and it is not showing the first dia.
+// this method rotate the wheel back to the first dia. (This will block the programm flow)
 void timeControler(boolean buttonState, boolean sensorState, unsigned long timeInterval){  
   static boolean bsOld = true;
   static unsigned long timeOld = 0;
   unsigned long timeNow = millis();
 
-  if(sensorState == true) // When sensor is triggered.
-    timeOld = timeNow; // Basically said like "deactivate timer system".
+  if(sensorState == true)   // When sensor is triggered.
+    timeOld = timeNow;      // Basically said like "deactivate timer system".
     
-  if(buttonState != bsOld){ // If button is pressed. (In this case, we really don't need to think about debouncing)
+  if(buttonState != bsOld){ // If button is pressed. (meaningless to check debouncing here)
     timeOld = timeNow;
     bsOld = buttonState;
   }
 
   if(abs(timeNow - timeOld) > timeInterval){
-      cali(); //at last execute one time calibration if needed.
+      cali();               //at last execute one time calibration if needed.
       timeOld = timeNow;
   }
 }
@@ -97,7 +98,7 @@ void timeControler(boolean buttonState, boolean sensorState, unsigned long timeI
 
 void cali(){
   while(!sensorDebouncer(digitalRead(sensor))){
-    digitalWrite(st,HIGH); //As work around for the problem on the line above.
+    digitalWrite(st,HIGH); //As work around for the limit of accelstepper library
     delayMicroseconds(1);
     digitalWrite(st,LOW);
     delayMicroseconds(caliSpeed);
@@ -111,30 +112,19 @@ void cali(){
 
 // Return true when sensor is triggered with debounced result, return false when sensor is not triggered
 boolean sensorDebouncer(int sensorState){
-  static int counter = 0; // How many times we have see the new value
+  static int counter = 0;           // How many times we have see the new value
   static int sensorStateOld = true; // The old state of sensor read value.
   if(sensorState == sensorStateOld && counter > 0)
     counter--;
   if(sensorState != sensorStateOld)
     counter++;
-  if(counter >= /*debounce_count*/1){ //TODO  :  is that meaningful to do 50 times counting and let motor do about 50 steps more than it needs?
+  if(counter >= 1){ // It's actually meaningless to do sensor debouncing. So here set to 1 as work around
     counter = 0;
     sensorStateOld = sensorState;
     if(sensorState == true)
-      return true;// return true when sensor is triggered
+      return true;  // return true when sensor is triggered
   }
   return false;
-}
-
-//read the sensor state and return how many steps are still not finished.
-// P.S. : I suspect there is only tiny "step lost" during time going 
-// caused by unprecision of all physical parts.
-int stepCorrecter(boolean sensorVal){
-   if(sensorDebouncer(sensorVal) == true)
-   //  if(sensorState == false)
-      // motor.setCurrentPosition(0); //reset the current position to zero. Calibration.
-     return motor.distanceToGo();
-   return 0; // if during the process sensor not triggered.
 }
 
 // Check if button really pushed down without bouncing problems
@@ -156,21 +146,20 @@ int buttonDebouncer(int buttonState){
 }
 
 //return the nextPositon in absolute value to move to. 
-//Argument diaNumber is setter to see how many dia moount on this Diabetrachter.
+//Argument diaNumber is used to set how many dias are mounted on the machine
 long nextPosition(int diaNumber){
   if(diaNow < diaNumber){
-    if(positionNow >= 3200) //When very fast constentively pushing button, positionNow will over flow.
+    if(positionNow >= 3200) // When very fast constentively pushing button, positionNow will over flow.
       return positionNow;
-    positionNow += 320; // 200steps per round, 16th drive mode.
+    positionNow += 320;     // 200steps per round, 16th driver mode -> 3200 steps/round
     diaNow++;
   } else{
-    positionNow = 3200; // go to the beginning.
-    diaNow = 1; //reset to the beginning.
+    positionNow = 3200;     // go to the beginning.
+    diaNow = 1;             // reset to the beginning.
   }
   return positionNow;
 }
 
-int readPin[4] = {3,4,7,12};
 //Read "Codier-Drehschalter" 4-bit raw values
 int codierReader(){
   int rawValue = 0; // raw read value built up by four raw read value from codier connected pins.
@@ -178,22 +167,23 @@ int codierReader(){
     pinMode(readPin[i],INPUT);
     digitalWrite(readPin[i],HIGH);
     int tmp = ~digitalRead(readPin[i]); //Invert the output.
-    rawValue += (tmp << (4-i)); //the first read value is the MSB (Most Significant Bit)
+    rawValue += (tmp << (4-i));         //the first read value is the MSB (Most Significant Bit)
   }
   return rawValue;
 }
 
-//return the number of Dias are mounted on maschine.
+//return the number of Dias are mounted on machine.
 int diaN(){
-  int realCode[10] = {-60,-44,-52,-36,-56,-40,-48,-32,-58,-42 //I read the number from hardware directlly.
-  };
+  //I read the number from hardware directlly.
+  int realCode[10] = {-60,-44,-52,-36,-56,-40,-48,-32,-58,-42};
   int codierNumber = codierReader(); // Read value from codier right now.
+  
   for(int i =0; i<10; i++){
     if(realCode[i] == codierNumber){
       if(i == 0) 
         return 10; // When codier point to 0, this set as default for all dias mounted on it.
-      return i; // return the decoded number of dias should be shown on going mashines.
+      return i;    // return the decoded number of dias should be shown on going mashines.
     }
   }
-  return 0; 
+  return 0;        // Only when read wrong value, return 0.
 }
