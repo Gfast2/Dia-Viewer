@@ -63,39 +63,21 @@ void loop(){
   
   if(stepToMove != 0){
     stepToCorrect = stepToMove-45; // 3200 stands 1/10 for a 200 steps/round step motor at 16th drive mode.
-//    Serial.print("stepToCorrect: ");
-//    Serial.println(stepToCorrect);
   }
   
   if(buttonTriggered == true && motor.distanceToGo() == 0){ //only when motor stopped, do reaction.
      long nextPosi = nextPosition(dias/*10*/); //dias is the number of dias mounted on the wheel.
-     /*
-     if(stepToCorrect != 0){
-       nextPosi -= stepToCorrect; // Compensate the missing steps on next movement.
-       stepToCorrect = 0;
-     }
-     */
+
      motor.moveTo(nextPosi); 
      buttonTriggered = false;
   }
   
   if(motor.currentPosition() >= 3200){ //if motor has finished to rotate around.
-//    if(motor.targetPosition() == motor.currentPosition()){ //if it's finished to rotating.
       motor.setCurrentPosition(0); //Reset current position back to 0.
       positionNow = 0;
-  //  }
   }
   
   motor.run();
-  //Serial.println(motor.currentPosition());
-
-  /*
-  int ledBrightness = brightnessRead();
-  setLed(ledBrightness);
-  */
-  //setLed(brightnessSetting()); // take care of the brightness of LEDs
-  //Serial.println(digitalRead(sensor));
-  //delay(3);
 }
 
 // If machine is not used more than timeInterval minute and it is not showing the first dia.
