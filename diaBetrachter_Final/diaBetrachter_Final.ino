@@ -1,20 +1,21 @@
-/* This is the firmware of a Diabetrachter (Dia Viewer), that can mount 10 piece of Dia on his rolling wheel. 
+/* This is the firmware of a Diabetrachter (Dia Viewer), which can mount 10 piece of Dia on his rolling wheel. 
  * User push the mechanical push button to see the next Dia. There is a position sensor build besides the 
- * rolling wheel. The sensor will be triggered one time on each round, in order to calibrate the precise pos-
- * ition of each Dia that are mounted on the wheel. In the controller modul of this machine there is a poten-
- * tion meter to control the brightness of the backlight for Dias and a codier which have 10 different posit-
- * ions to set how many Dias mounted / should be displayed. At last there is a timer system to help reset the
- * system. If the machine is not used more than two minute and the showned dia is not the first one, it will 
- * roll back to the first Dia automatically.
+ * rolling wheel. The sensor will be triggered one time on each round, that is used to calibrate the  pos-
+ * ition of each Dia that are mounted on the wheel. In the controller modul of this machine there is a codier 
+ * which can be set to 10 different values, that is used to set how many Dias mounted / should be displayed. 
+ * At last there is a timer system to help reset the system (That means go back to the first Dia). If the mac-
+ * hine is not used more than 40 seconds and the showned dia is not the first one, it will roll back to the 
+ * first Dia automatically.
  *
  *
  * TODO  :  If the first Dia is always be exposured under light, it will change its color much faster than other.
+ *          And I think it happens even under the light of low brightness LED lights.
  *
  *
  * Design References:
  * Button Debouncing      : http://playground.arduino.cc/Learning/SoftwareDebounce
  * Gabellichtschranke Pnp : http://www.voelkner.de/products/37880/Gabellichtschranke-Pnp-Pm-F24p-5mm.html
- *
+ * Accelstepper library   : http://www.airspayce.com/mikem/arduino/AccelStepper
  *
  *
  * written by  :  Su Gao
@@ -104,7 +105,6 @@ void timeControler(boolean buttonState, boolean sensorState, unsigned long timeI
 
 void cali(){
   while(!sensorDebouncer(digitalRead(sensor))){
-    //motor.runSpeed(); //run constant speed, slowly
     digitalWrite(st,HIGH); //As work around for the problem on the line above.
     delayMicroseconds(1);
     digitalWrite(st,LOW);
