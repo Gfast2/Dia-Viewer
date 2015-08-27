@@ -24,33 +24,31 @@
  */
 #include <AccelStepper.h>
 
-int button = 8; // push button for user
-int st = 2; // step motor driver step pin
-int sensor = 6; // infarot sensor (for positioning) pin, using the white wire, 1-position hole, 0-normal.
-
-boolean sensorState; // default not see the position h ole. false - no hole, true - hole (sensor triggered)
-boolean buttonState; // button pushed down - LOW, else return HIGH
-boolean buttonTriggered; //return true when triggered debounced triggered, return false when not triggered.
-int debounce_count = 50; // number of millis/samples to consider before declaring a debounced input
-int dias = 0; // read how many dias should be displayed.
-int positionNow = 0; //new targeted position in unit step
-int diaNow = 1; // position in unit dia number
-unsigned long timeInterval = 40000; // When machine is not used more than 40 seconds, it will go back to start+calibrate it self,too.
-long caliSpeed = 2500; //Unit: Microsecond. set the rotation speed when motor do calibration.
 AccelStepper motor(1, 2, 3); //(mode, st pin, dir pin) Tipp: https://www.pjrc.com/teensy/td_libs_AccelStepper.html
 
-void setup(){
-  
-  pinMode(st,OUTPUT); //STEP pin of step motor
-  pinMode(button ,INPUT);
-  digitalWrite(button, HIGH); // activate pull-up resistor in AVR  
+int st = 2;     // step motor driver step pin
+int button = 8; // push button for user
+int sensor = 6; // infarot sensor (for positioning) pin, using the white wire, 1-position hole, 0-normal.
 
-  pinMode(sensor,INPUT);
+boolean sensorState;     // default not see the position hole. false - no hole, true - hole (sensor triggered)
+boolean buttonState;     // when button pushed down return LOW, else return HIGH
+boolean buttonTriggered; // return true when debounced button read value changed & seen as "triggered",else return false.
+int debounce_count = 50; // sample number for debouncing.
+int dias = 0;            // read how many dias should be displayed.
+int positionNow = 0;     // new targeted position in unit step
+int diaNow = 1;          // position in unit dia number
+unsigned long timeInterval = 40000; // When machine is not used more than 40 seconds, it will go back to begin & calibrate it self.
+long caliSpeed = 2500;   //Unit: Microsecond. set the rotation speed when motor do calibration.
+
+void setup(){  
+  pinMode(st,    OUTPUT); //STEP pin of step motor
+  pinMode(button, INPUT);
+  digitalWrite(button, HIGH); // activate pull-up resistor in AVR  
+  pinMode(sensor, INPUT);
   
   dias = diaN(); // check how many dias should be displayed. Note: This check only happen once at very beginning.
-  cali(); //do startup calibration.
+  cali();        //do startup calibration.
 }
-
 
 int stepToCorrect = 0; // buffer for steps to be correct.
 void loop(){
