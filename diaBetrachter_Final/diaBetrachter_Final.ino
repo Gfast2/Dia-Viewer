@@ -25,7 +25,6 @@
 
 int button = 8; // push button for user
 int st = 2; // step motor driver step pin
-//int led[5] = {5,6,9,10,11}; // pins for white LEDs
 int sensor = 6; // infarot sensor (for positioning) pin, using the white wire, 1-position hole, 0-normal.
 
 boolean sensorState; // default not see the position h ole. false - no hole, true - hole (sensor triggered)
@@ -40,24 +39,15 @@ long caliSpeed = 2500; //Unit: Microsecond. set the rotation speed when motor do
 AccelStepper motor(1, 2, 3); //(mode, st pin, dir pin) Tipp: https://www.pjrc.com/teensy/td_libs_AccelStepper.html
 
 void setup(){
-//  Serial.begin(115200);
-//  Serial.println("I started.");
   
   pinMode(st,OUTPUT); //STEP pin of step motor
   pinMode(button ,INPUT);
   digitalWrite(button, HIGH); // activate pull-up resistor in AVR  
-  /*
-  for(int i = 0; i<5; i++)
-    pinMode(led[i], OUTPUT);
-  */
+
   pinMode(sensor,INPUT);
-  //pinMode(brightSetting, INPUT);
   
   dias = diaN(); // check how many dias should be displayed. Note: This check only happen once at very beginning.
-//  Serial.print("dias now is: ");
-//  Serial.println(dias);
   cali(); //do startup calibration.
-//  Serial.println("jump out of setup()");
 }
 
 
