@@ -50,29 +50,23 @@ void setup(){
   cali();        //do startup calibration.
 }
 
-int stepToCorrect = 0; // buffer for steps to be correct.
 void loop(){
   buttonState = digitalRead(button);
   sensorState = digitalRead(sensor); //Lichtschrankgabe read value.
   
   //read the position of the wheel. If it is not the zero point, let it calibration, if yes, do nothing.
   timeControler(buttonState, sensorState, timeInterval); 
-  int stepToMove = stepCorrecter(sensorState); // Check if sensor is triggered and where it's triggered.
+  
   buttonTriggered = buttonDebouncer(buttonState); // check button state without bouncing problem.
   
-  if(stepToMove != 0){
-    stepToCorrect = stepToMove-45; // 3200 stands 1/10 for a 200 steps/round step motor at 16th drive mode.
-  }
-  
-  if(buttonTriggered == true && motor.distanceToGo() == 0){ //only when motor stopped, do reaction.
-     long nextPosi = nextPosition(dias/*10*/); //dias is the number of dias mounted on the wheel.
-
+  if(buttonTriggered == true && motor.distanceToGo() == 0){ //only when motor stopped, reactive for button.
+     long nextPosi = nextPosition(dias);                    //number of dias mounted on the machine.
      motor.moveTo(nextPosi); 
      buttonTriggered = false;
   }
   
   if(motor.currentPosition() >= 3200){ //if motor has finished to rotate around.
-      motor.setCurrentPosition(0); //Reset current position back to 0.
+      motor.setCurrentPosition(0);     //Reset current position back to 0.
       positionNow = 0;
   }
   
@@ -176,12 +170,6 @@ long nextPosition(int diaNumber){
   return positionNow;
 }
 
-//set the brightness of all leds.
-void setLed(int brightness){
-  for(int i; i<5; i++)
-    analogWrite(led[i], brightness);
-}
-*/
 int readPin[4] = {3,4,7,12};
 //Read "Codier-Drehschalter" 4-bit raw values
 int codierReader(){
