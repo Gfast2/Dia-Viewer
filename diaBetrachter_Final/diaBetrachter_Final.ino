@@ -99,14 +99,10 @@ void timeControler(boolean buttonState, boolean sensorState, unsigned long timeI
       cali(); //at last execute one time calibration if needed.
       timeOld = timeNow;
   }
-  //Serial.println(abs(timeNow - timeOld));
 }
 
 
 void cali(){
-//  Serial.println("start cali()");
-//  motor.setSpeed(1500); //set the speed.
-//  motor.setMaxSpeed(3000);
   while(!sensorDebouncer(digitalRead(sensor))){
     //motor.runSpeed(); //run constant speed, slowly
     digitalWrite(st,HIGH); //As work around for the problem on the line above.
@@ -114,18 +110,15 @@ void cali(){
     digitalWrite(st,LOW);
     delayMicroseconds(caliSpeed);
   }
-  //Serial.println("jump out of while loop in cali()");
   motor.setCurrentPosition(0); //hard stop motor + reset the position of motor.
   motor.setMaxSpeed(300);
   motor.setAcceleration(1600);
   diaNow = 1;
   positionNow = 0;
-//  Serial.println("jump out cali()");
 }
 
 // Return true when sensor is triggered with debounced result, return false when sensor is not triggered
 boolean sensorDebouncer(int sensorState){
-//  Serial.println("in sensorDebouncer()");
   static int counter = 0; // How many times we have see the new value
   static int sensorStateOld = true; // The old state of sensor read value.
   if(sensorState == sensorStateOld && counter > 0)
@@ -178,24 +171,11 @@ long nextPosition(int diaNumber){
       return positionNow;
     positionNow += 320; // 200steps per round, 16th drive mode.
     diaNow++;
-//    Serial.println("if state here");
   } else{
     positionNow = 3200; // go to the beginning.
     diaNow = 1; //reset to the beginning.
-//    Serial.println("else state here");
   }
-  /*
-  Serial.print("diaNow = ");
-  Serial.print(diaNow);
-  Serial.print(" positionNow: ");
-  Serial.println(positionNow);
-  */
   return positionNow;
-}
-/*
-// Get the target brigtness of all LEDs.
-int brightnessRead(){
-  return (int) (analogRead(brightSetting) / 4);
 }
 
 //set the brightness of all leds.
