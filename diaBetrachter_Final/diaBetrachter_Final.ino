@@ -23,7 +23,6 @@
  */
 #include <AccelStepper.h>
 
-//#define brightSetting A0
 int button = 8; // push button for user
 int st = 2; // step motor driver step pin
 //int led[5] = {5,6,9,10,11}; // pins for white LEDs
