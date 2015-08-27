@@ -185,7 +185,6 @@ void setLed(int brightness){
 }
 */
 int readPin[4] = {3,4,7,12};
-//int readVal[4] = {0,0,0,0}; //raw read values from pins connected to codier
 //Read "Codier-Drehschalter" 4-bit raw values
 int codierReader(){
   int rawValue = 0; // raw read value built up by four raw read value from codier connected pins.
@@ -200,21 +199,7 @@ int codierReader(){
 
 //return the number of Dias are mounted on maschine.
 int diaN(){
-  int realCode[10] = {-60,-44,-52,-36,-56,-40,-48,-32,-58,-42
-    /* 
-    // The Binary code not works as I expected. 
-    // but I read the Code above directlly.
-    0b0000,
-    0b1000,
-    0b0100,
-    0b1100,
-    0b0010,
-    0b1010,
-    0b0110,
-    0b1110,
-    0b0001,
-    0b1001
-    */
+  int realCode[10] = {-60,-44,-52,-36,-56,-40,-48,-32,-58,-42 //I read the number from hardware directlly.
   };
   int codierNumber = codierReader(); // Read value from codier right now.
   for(int i =0; i<10; i++){
@@ -224,6 +209,5 @@ int diaN(){
       return i; // return the decoded number of dias should be shown on going mashines.
     }
   }
-//  Serial.println("Codier doesn't give a correct number"); // TODO : Give out a more clearly exception.
   return 0; 
 }
